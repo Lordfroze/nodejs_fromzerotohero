@@ -25,14 +25,14 @@ app.get('/api/users', (req, res) => {
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     if (username === 'yoga' && password === '1234') {
-        res.json({
+        res.status(200).json({
             status: 'success',
             message: 'Login success'
         })
     } else {
-        res.json({
+        res.status(401).json({
             status: 'error',
-            message: 'Login failed'
+            message: 'username atau password salah'
         })
     }
 })

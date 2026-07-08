@@ -2,12 +2,26 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 const PORT = process.env.PORT
+const { cors, corsDev } = require('./middleware/corsPackage')
+
 
 // middleware
+app.use(corsDev) // development perbolehkan semua
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // routes
+
+// test cors
+app.get('/test-cors', (req, res) => {
+    res.json({
+        message: 'CORS Test is Working',
+        origin: req.header.origin,
+        timestamp: new Date().toISOString(),
+    })
+})
+
+// test endpoint
 app.get('/', (req, res) => {
     res.json({
         message: 'Backend Security Demo',

@@ -4,6 +4,7 @@ const app = express()
 const PORT = process.env.PORT
 const { cors, corsDev } = require('./middleware/corsPackage')
 const { validateRegister, validateLogin, isValidUsername, isValidEmail } = require('./middleware/validator') // importasi middleware validasi
+const { escapeHTML, sanitizeFields, sanitizeBody } = require('./middleware/sanitizer') // import middleware sanitasi
 
 
 // middleware
@@ -53,6 +54,24 @@ app.post('/login', validateLogin, (req, res) => {
         username: req.body.username
     })
 })
+
+// endpoint sanitasi
+app.post('/sanitize', sanitizeBody, (req, res) => {
+    res.json({
+        original: req.body,
+        sanitized: req.body,
+        message: `Sanitasi data berhasil dilakukan`,
+    })
+})
+
+// endpoint sanitasi dengan fields
+app.post('/sanitize-comment', sanitizeFields, (req, res) => {
+    res.json({
+        sanitized: req.body,
+        message: `Comment sanitasi berhasil dilakukan`,
+    })
+})
+
 
 // test endpoint
 app.get('/', (req, res) => {

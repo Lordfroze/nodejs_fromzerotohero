@@ -6,6 +6,9 @@ const { cors, corsDev } = require('./middleware/corsPackage')
 const { validateRegister, validateLogin, isValidUsername, isValidEmail } = require('./middleware/validator') // importasi middleware validasi
 const { escapeHTML, sanitizeFields, sanitizeBody } = require('./middleware/sanitizer') // import middleware sanitasi
 const { basicAuth, requireRole } = require('./middleware/auth') // import middleware auth
+const { hashPassword, verifyPassword, generateRandomPassword } = require('./middleware/bcrypt') // import middleware bcrypt
+
+const users = [] // Membuat array untuk menyimpan data user
 
 // middleware
 app.use(corsDev) // development perbolehkan semua
@@ -100,7 +103,62 @@ app.get('/dashboard', basicAuth, requireRole(['user', 'admin']), (req, res) => {
     })
 })
 
+// endpoint hashing password
+app.post('/daftar', async (req, res) => {
+    const { username, password } = req.body
 
+    if (!username || !password) {
+        return res.json({
+            error: 'Username and password are required',
+        })
+    }
+
+    // debug hashing password
+    console.log("input password:", password)
+    const hashed = await hashPassword(password)
+    console.log("hashed password:", hashed)
+
+    // simpan user ke array users
+    const newUser = {
+        id: users.length + 1,
+        username,
+        password: hashed,
+    }
+    users.push(newUser)
+
+    console.log("user tersimpan:", { id: newUser.id, username: newUser.username })
+
+    res.json({
+        success: true,
+        message: 'Password hashed successfully',
+        data: { id: newUser.id, username: newUser.username, }
+    })
+})
+
+app.post('/masuk', async (req, res) => {
+    const { username, password } = req.body
+
+    const user = users.find(u => u.username === username)
+    if (!user) {
+        return res.status(401).json({
+            success: false,
+            message: 'Invalid Credentials',
+        })
+    }
+    const isValid = await verifyPassword(password, user.password)
+    if (!isValid) {
+        return res.status(401).json({
+            success: false,
+            message: 'Invalid Credentials',
+        })
+    }
+
+    res.json({
+        success: true,
+        message: 'Login successful',
+        user: { id: user.id, username: user.username, }
+    })
+})
 
 // test endpoint
 app.get('/', (req, res) => {

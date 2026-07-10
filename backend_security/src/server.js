@@ -5,7 +5,7 @@ const PORT = process.env.PORT
 const { cors, corsDev } = require('./middleware/corsPackage')
 const { validateRegister, validateLogin, isValidUsername, isValidEmail } = require('./middleware/validator') // importasi middleware validasi
 const { escapeHTML, sanitizeFields, sanitizeBody } = require('./middleware/sanitizer') // import middleware sanitasi
-
+const { basicAuth, requireRole } = require('./middleware/auth') // import middleware auth
 
 // middleware
 app.use(corsDev) // development perbolehkan semua
@@ -71,6 +71,35 @@ app.post('/sanitize-comment', sanitizeFields, (req, res) => {
         message: `Comment sanitasi berhasil dilakukan`,
     })
 })
+
+// endpoint protected
+app.get('/protected', basicAuth, (req, res) => {
+    res.json({
+        success: true,
+        message: 'Acces Granted to Protected endpoint',
+        user: req.user,
+    })
+})
+
+// endpoint protected dengan role
+app.get('/protected-admin', basicAuth, requireRole(['admin']), (req, res) => {
+    res.json({
+        success: true,
+        message: 'Acces Granted to Protected Admin endpoint',
+        user: req.user,
+    })
+})
+
+// endpoint dashboard protected dengan role user dan admin
+app.get('/dashboard', basicAuth, requireRole(['user', 'admin']), (req, res) => {
+    res.json({
+        success: true,
+        message: 'Acces Granted to Dashboard endpoint',
+        user: req.user,
+        role: req.user.role,
+    })
+})
+
 
 
 // test endpoint

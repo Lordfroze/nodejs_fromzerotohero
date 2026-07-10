@@ -19,8 +19,9 @@ const basicAuth = (req, res, next) => {
         { username: 'admin', password: 'admin123', role: 'admin' },
         { username: 'user', password: 'user123', role: 'user' }
     ]
+    const user = validUsers.find(u => u.username === username && u.password === password)
 
-    if (!users) {
+    if (!user) {
         return res.status(401).json({
             success: false,
             error: 'Invalid credentials',
@@ -58,7 +59,7 @@ const requireRole = (roles) => {
     }
 }
 
-module.exports = [
+module.exports = {
     basicAuth,
     requireRole
-]
+}
